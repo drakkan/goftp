@@ -27,7 +27,7 @@ func (c *Client) Retrieve(path string, dest io.Writer) error {
 
 	var bytesSoFar int64
 	for {
-		n, err := c.transferFromOffset(path, dest, nil, bytesSoFar)
+		n, err := c.TransferFromOffset(path, dest, nil, bytesSoFar)
 
 		bytesSoFar += n
 
@@ -105,7 +105,7 @@ func (c *Client) Store(path string, src io.Reader) error {
 			bytesSoFar = size
 		}
 
-		n, err = c.transferFromOffset(path, nil, src, bytesSoFar)
+		n, err = c.TransferFromOffset(path, nil, src, bytesSoFar)
 
 		bytesSoFar += n
 
@@ -139,7 +139,8 @@ func (c *Client) Store(path string, src io.Reader) error {
 	return nil
 }
 
-func (c *Client) transferFromOffset(path string, dest io.Writer, src io.Reader, offset int64) (int64, error) {
+// TransferFromOffset starts STOR or RETR from the give offset
+func (c *Client) TransferFromOffset(path string, dest io.Writer, src io.Reader, offset int64) (int64, error) {
 	pconn, err := c.getIdleConn()
 	if err != nil {
 		return 0, err
