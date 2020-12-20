@@ -33,6 +33,8 @@ type RawConn interface {
 
 	// Close the control and data connection, if open.
 	Close() error
+
+	SendCommandNoWaitResponse(f string, args ...interface{}) error
 }
 
 // Represents a single connection to an FTP server.
@@ -71,6 +73,12 @@ type persistentConn struct {
 
 func (pconn *persistentConn) SendCommand(f string, args ...interface{}) (int, string, error) {
 	return pconn.sendCommand(f, args...)
+}
+
+func (pconn *persistentConn) SendCommandNoWaitResponse(f string, args ...interface{}) error {
+	cmd := fmt.Sprintf(f, args...)
+	pconn.controlConn.SetWriteDeadline(time.Now().Add(pconn.config.Timeout))
+	return pconn.writer.PrintfLine("%s", cmd)
 }
 
 func (pconn *persistentConn) PrepareDataConn() (func() (net.Conn, error), error) {
